@@ -1,0 +1,9 @@
+:root{--bg:#f8fafc;--accent:#2b7cff;--text:#0b1220}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Helvetica,Arial; background:var(--bg); color:var(--text); margin:0}
+.site-header{display:flex;align-items:center;gap:12px;padding:28px 20px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.logo{height:56px;width:auto}
+.content{max-width:900px;margin:36px auto;padding:0 20px}
+.services ul{list-style:none;padding:0}
+.services li{margin:8px 0}
+.services a{color:var(--accent);font-weight:600;text-decoration:none}
+.site-footer{text-align:center;padding:24px;color:#6b7280}
