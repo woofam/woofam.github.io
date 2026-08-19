@@ -17,7 +17,7 @@
 ---
 
 ### 2. 🎓 Kids English Studio (키즈 AI 에듀테크)
-> 🔗 **[Kids Contents Agent 프로젝트](https://github.com/woofam)**
+> 🚧 **[서비스 소개 페이지 준비 중 (엔진 개발 진행 중)]**
 
 - 📖 **Personalized AI Storybook**: 아동 일상 메모를 A1~A2 맞춤 영어 동화 및 세로 스크롤 웹툰으로 생성
 - 📑 **E-Book & Workbook Assembly**: E-Book, 워크북, QA 리포트 로컬 릴리즈 자동 패키징

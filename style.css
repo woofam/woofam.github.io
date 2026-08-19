@@ -268,6 +268,19 @@ body {
   box-shadow: 0 0 8px #be185d;
 }
 
+.badge-status-coming {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-status-coming .engine-dot-amber {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
 .brand-card-title {
   font-size: 1.65rem;
   font-weight: 800;
@@ -376,15 +389,35 @@ body {
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
 }
 
-.btn-launch-brand.btn-kids {
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+.btn-launch-brand.btn-kids-dev {
+  background: #fdf4ff;
+  border: 1.5px dashed rgba(124, 58, 237, 0.45);
+  color: var(--text-sub);
+  box-shadow: none;
+  cursor: default;
 }
 
-.btn-launch-brand.btn-kids:hover {
-  background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+.btn-launch-brand.btn-kids-dev .btn-main-txt {
+  color: var(--brand-purple);
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.btn-launch-brand.btn-kids-dev .btn-sub-txt {
+  color: #7c3aed;
+  opacity: 0.8;
+}
+
+.badge-pill-dev {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: var(--brand-purple);
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
 }
 
 .btn-text-group {
@@ -603,6 +636,13 @@ body {
 
 .footer-links a:hover {
   color: var(--brand-blue);
+}
+
+.footer-link-disabled {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: default;
+  user-select: none;
 }
 
 /* --- Responsive --- */
