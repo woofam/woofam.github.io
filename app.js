@@ -1,874 +1,458 @@
 /**
- * Woofam Universe & Services Directory - Core Logic & Easter Egg Game
+ * Woofam — Minimal Portal & 8-Bit Pixel Human Hurdle Runner Game
  */
 
-// --- 1. Service Dataset Definition ---
-const SERVICES_DATA = [
-  {
-    id: "3sec-value",
-    name: "3초 가성비 (3-Sec Value)",
-    shortName: "3초 가성비",
-    category: "3sec",
-    categoryLabel: "3-Sec Life",
-    status: "LIVE",
-    tagline: "단품 vs 묶음 3초 소비 공식",
-    description: "다이소, 노브랜드, 쿠팡, 트레이더스 등 온·오프라인 유통 채널별 최적 구매 수량과 손익분기점(BEP)을 3초 만에 제시하는 낭비 제로 스마트 쇼핑 가이드.",
-    icon: "⚡",
-    url: "https://woofam.github.io/3sec-value/",
-    github: "https://github.com/woofam/3sec-value",
-    featured: true,
-    tags: ["소비공식", "최저가비교", "손익분기", "자취생필품", "스마트쇼핑"]
-  },
-  {
-    id: "3sec-recipe",
-    name: "3초 레시피 (3-Sec Recipe)",
-    shortName: "3초 레시피",
-    category: "3sec",
-    categoryLabel: "3-Sec Life",
-    status: "LIVE",
-    tagline: "3초 만에 고르는 한 끼 공식",
-    description: "냉장고 속 재료와 현재 상황을 바탕으로 고민 없이 3초 만에 메뉴를 결정해 주는 초간단 원팬 & 자취 요리 레시피 큐레이션 서비스.",
-    icon: "🍳",
-    url: "https://woofam.github.io/3sec/",
-    github: "https://github.com/woofam/3sec",
-    featured: true,
-    tags: ["초간단요리", "자취요리", "재료별추천", "3초결정", "식단고민해결"]
-  },
-  {
-    id: "3sec-routine",
-    name: "3초 루틴 (3-Sec Routine)",
-    shortName: "3초 루틴",
-    category: "3sec",
-    categoryLabel: "3-Sec Life",
-    status: "COMING_SOON",
-    tagline: "미루기 방지 3초 카운트다운 타이머",
-    description: "생각이 많아 시작하지 못할 때 5-4-3-2-1 즉각 실행 법칙을 적용하여 집중력을 극대화하는 미니멀 생산성 루틴 도구.",
-    icon: "⏱️",
-    url: "#",
-    github: "https://github.com/woofam/3sec",
-    featured: false,
-    tags: ["생산성", "집중타이머", "루틴관리", "행동과학"]
-  },
-  {
-    id: "unit-converter",
-    name: "단위 환산 매트릭스 (Unit Matrix)",
-    shortName: "단위 환산",
-    category: "utility",
-    categoryLabel: "Utilities",
-    status: "BETA",
-    tagline: "100g/10ml당 실질 단가 즉시 환산",
-    description: "복잡한 포장 단위와 규격을 일관된 100g/10ml/개당 가격으로 즉각 비교 환산해 주는 쇼퍼용 스마트 유틸리티.",
-    icon: "📐",
-    url: "https://woofam.github.io/3sec-value/",
-    github: "https://github.com/woofam",
-    featured: false,
-    tags: ["단위환산", "단가계산", "장보기도구", "유틸리티"]
-  },
-  {
-    id: "regex-studio",
-    name: "정규식 치트 스튜디오 (Regex Studio)",
-    shortName: "Regex Studio",
-    category: "dev",
-    categoryLabel: "Dev Tools",
-    status: "LIVE",
-    tagline: "자주 쓰는 정규식 패턴 즉시 검증",
-    description: "이메일, 전화번호, 비밀번호, URL 등 자주 쓰이는 정규식 패턴을 원클릭으로 테스트하고 복사하는 개발자용 경량 툴킷.",
-    icon: "🪄",
-    url: "https://github.com/woofam",
-    github: "https://github.com/woofam",
-    featured: false,
-    tags: ["개발도구", "정규표현식", "치트시트", "웹유틸리티"]
-  },
-  {
-    id: "quick-memo",
-    name: "휘발성 로컬 메모 (Instant Pad)",
-    shortName: "Instant Pad",
-    category: "life",
-    categoryLabel: "Daily Tools",
-    status: "LIVE",
-    tagline: "서버 저장 없는 100% 로컬 프라이빗 메모장",
-    description: "브라우저 로컬 스토리지에만 안전하게 보관되는 초경량 마크다운 지원 임시 메모 및 스크래치패드.",
-    icon: "📝",
-    url: "https://github.com/woofam",
-    github: "https://github.com/woofam",
-    featured: false,
-    tags: ["로컬메모", "마크다운", "프라이버시", "스크래치패드"]
-  }
-];
-
-// --- 2. State & DOM References ---
-let currentCategory = "all";
-let searchQuery = "";
-
-const themeToggleBtn = document.getElementById("themeToggleBtn");
-const searchInput = document.getElementById("searchInput");
-const searchClearBtn = document.getElementById("searchClearBtn");
-const filterPills = document.querySelectorAll(".pill-btn");
-const featuredContainer = document.getElementById("featuredCardsContainer");
-const servicesGrid = document.getElementById("servicesGrid");
-const toastContainer = document.getElementById("toastContainer");
-
-// --- 3. Theme Toggle & Persistence ---
-function initTheme() {
-  const savedTheme = localStorage.getItem("woofam_theme");
-  if (savedTheme) {
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  } else {
-    // Default to dark theme
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialTheme = prefersDark ? "dark" : "dark";
-    document.documentElement.setAttribute("data-theme", initialTheme);
-    localStorage.setItem("woofam_theme", initialTheme);
-  }
-  updateThemeIcon();
-}
-
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  const newTheme = currentTheme === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", newTheme);
-  localStorage.setItem("woofam_theme", newTheme);
-  updateThemeIcon();
-  showToast(`☀️/🌙 ${newTheme === "dark" ? "다크" : "라이트"} 모드로 전환되었습니다.`);
-}
-
-function updateThemeIcon() {
-  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-  if (!themeToggleBtn) return;
-  themeToggleBtn.setAttribute("aria-label", isDark ? "라이트 모드로 전환" : "다크 모드로 전환");
-  themeToggleBtn.innerHTML = isDark
-    ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
-    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-}
-
-// --- 4. Render Functions ---
-function getBadgeHtml(status) {
-  if (status === "LIVE") {
-    return `<span class="badge badge-live"><span class="badge-dot"></span>LIVE</span>`;
-  } else if (status === "BETA") {
-    return `<span class="badge badge-beta"><span class="badge-dot"></span>BETA</span>`;
-  } else {
-    return `<span class="badge badge-soon"><span class="badge-dot"></span>COMING SOON</span>`;
-  }
-}
-
-function renderFeatured() {
-  if (!featuredContainer) return;
-  const featuredServices = SERVICES_DATA.filter((s) => s.featured);
-
-  featuredContainer.innerHTML = featuredServices
-    .map(
-      (item) => `
-      <article class="featured-card" id="featured-${item.id}">
-        <div>
-          <div class="card-top">
-            <div class="card-icon">${item.icon}</div>
-            ${getBadgeHtml(item.status)}
-          </div>
-          <h3 class="card-title font-display">${item.name}</h3>
-          <p class="card-tagline">"${item.tagline}"</p>
-          <p class="card-desc">${item.description}</p>
-          <div class="card-tags">
-            ${item.tags.map((tag) => `<span class="tag">#${tag}</span>`).join("")}
-          </div>
-        </div>
-        <div class="card-actions">
-          <a href="${item.url}" class="btn-primary" target="_blank" rel="noopener noreferrer" id="btn-launch-${item.id}">
-            <span>서비스 바로가기</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-          <a href="${item.github}" class="btn-secondary" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-            </svg>
-            <span>GitHub</span>
-          </a>
-          <button type="button" class="share-btn" onclick="copyServiceUrl('${item.url}', '${item.name}')" title="URL 복사">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-          </button>
-        </div>
-      </article>
-    `
-    )
-    .join("");
-}
-
-function renderServicesGrid() {
-  if (!servicesGrid) return;
-
-  const filtered = SERVICES_DATA.filter((service) => {
-    const matchesCategory = currentCategory === "all" || service.category === currentCategory;
-    const query = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      query === "" ||
-      service.name.toLowerCase().includes(query) ||
-      service.tagline.toLowerCase().includes(query) ||
-      service.description.toLowerCase().includes(query) ||
-      service.tags.some((t) => t.toLowerCase().includes(query));
-
-    return matchesCategory && matchesSearch;
-  });
-
-  if (filtered.length === 0) {
-    servicesGrid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <h3>일치하는 서비스가 없습니다</h3>
-        <p style="margin-top: 6px; font-size: 0.9rem;">"${searchQuery}" 검색어에 맞는 서비스가 없습니다. 다른 검색어를 입력해 보세요.</p>
-      </div>
-    `;
-    return;
-  }
-
-  servicesGrid.innerHTML = filtered
-    .map(
-      (item) => `
-      <article class="service-card" id="card-${item.id}">
-        <div>
-          <div class="service-header">
-            <div class="service-icon">${item.icon}</div>
-            ${getBadgeHtml(item.status)}
-          </div>
-          <h3 class="service-name font-display">${item.name}</h3>
-          <p class="service-summary">${item.description}</p>
-          <div class="card-tags">
-            ${item.tags.slice(0, 3).map((tag) => `<span class="tag">#${tag}</span>`).join("")}
-          </div>
-        </div>
-        <div class="service-footer">
-          <a href="${item.url}" class="service-link" ${item.url !== "#" ? 'target="_blank" rel="noopener noreferrer"' : ""}>
-            <span>${item.status === "COMING_SOON" ? "출시 예정" : "바로가기"}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </a>
-          <button type="button" class="share-btn" onclick="copyServiceUrl('${item.url}', '${item.name}')" title="링크 복사">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          </button>
-        </div>
-      </article>
-    `
-    )
-    .join("");
-}
-
-// --- 5. Interactive Utilities ---
-function copyServiceUrl(url, name) {
-  if (url === "#") {
-    showToast(`ℹ️ ${name} 서비스는 곧 출시될 예정입니다.`);
-    return;
-  }
-  navigator.clipboard
-    .writeText(url)
-    .then(() => {
-      showToast(`✨ ${name} 링크가 복사되었습니다!`);
-    })
-    .catch(() => {
-      showToast(`🔗 링크: ${url}`);
-    });
-}
-
-function showToast(message) {
-  if (!toastContainer) return;
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-    <span>${message}</span>
-  `;
-  toastContainer.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    toast.classList.add("show");
-  });
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-  }, 2800);
-}
+document.addEventListener("DOMContentLoaded", () => {
+  initGame();
+});
 
 // ==========================================================================
-// 6. Easter Egg: 3-Sec Hurdle Runner (무한 런닝머신 점프 게임 엔진)
+// 8-Bit Pixel Human Runner Game Engine (Treadmill Hurdle Run)
 // ==========================================================================
-const gameModal = document.getElementById("gameModal");
-const easterEggBtn = document.getElementById("easterEggBtn");
-const closeGameBtn = document.getElementById("closeGameBtn");
-const startGameBtn = document.getElementById("startGameBtn");
-const gameCanvas = document.getElementById("gameCanvas");
-const gameOverlayMsg = document.getElementById("gameOverlayMsg");
-const gameHighScoreEl = document.getElementById("gameHighScore");
-const gameSpeedDisplayEl = document.getElementById("gameSpeedDisplay");
-
-let ctx = null;
-let gameAnimId = null;
-let gameState = "IDLE"; // IDLE, RUNNING, GAMEOVER
-let highScore = parseInt(localStorage.getItem("woofam_runner_highscore") || "0", 10);
-
-// Game Entities & Constants
-const GROUND_Y = 210;
-let runner = {
-  x: 70,
-  y: GROUND_Y - 40,
-  width: 32,
-  height: 40,
-  vy: 0,
-  gravity: 0.85,
-  jumpPower: -14.5,
-  isGrounded: true,
-  runFrame: 0,
-  particles: []
-};
-
-let obstacles = [];
-let treadmillLines = [];
-let gameScore = 0;
-let gameSpeed = 5.5;
-let spawnTimer = 0;
-let celebrationText = "";
-let celebrationTimer = 0;
-
-function openEasterEggGame() {
-  if (!gameModal) return;
-  gameModal.classList.add("active");
-  gameModal.setAttribute("aria-hidden", "false");
-  if (!ctx && gameCanvas) {
-    ctx = gameCanvas.getContext("2d");
-  }
-  updateHighScoreDisplay();
-  resetGame();
-  drawIdleScreen();
-}
-
-function closeEasterEggGame() {
-  if (!gameModal) return;
-  gameModal.classList.remove("active");
-  gameModal.setAttribute("aria-hidden", "true");
-  if (gameAnimId) {
-    cancelAnimationFrame(gameAnimId);
-    gameAnimId = null;
-  }
-  gameState = "IDLE";
-}
-
-function updateHighScoreDisplay() {
-  if (gameHighScoreEl) {
-    gameHighScoreEl.textContent = `${highScore}m`;
-  }
-}
-
-function resetGame() {
-  runner.y = GROUND_Y - runner.height;
-  runner.vy = 0;
-  runner.isGrounded = true;
-  runner.particles = [];
-  obstacles = [];
-  gameScore = 0;
-  gameSpeed = 6;
-  spawnTimer = 50;
-  celebrationText = "";
-  celebrationTimer = 0;
-
-  // Initialize treadmill stripes
-  treadmillLines = [];
-  for (let i = 0; i < 20; i++) {
-    treadmillLines.push({ x: i * 40 });
-  }
-}
-
-function startRunnerGame() {
-  resetGame();
-  gameState = "RUNNING";
-  if (gameOverlayMsg) gameOverlayMsg.classList.add("hidden");
-  if (gameAnimId) cancelAnimationFrame(gameAnimId);
-  lastTime = performance.now();
-  loopGame();
-}
-
-function jump() {
-  if (gameState === "RUNNING") {
-    if (runner.isGrounded) {
-      runner.vy = runner.jumpPower;
-      runner.isGrounded = false;
-      // Add jump burst particles
-      for (let i = 0; i < 8; i++) {
-        runner.particles.push({
-          x: runner.x + runner.width / 2,
-          y: runner.y + runner.height,
-          vx: (Math.random() - 0.5) * 4,
-          vy: Math.random() * -3,
-          size: Math.random() * 4 + 2,
-          color: "#38bdf8",
-          alpha: 1
-        });
-      }
-    }
-  } else if (gameState === "GAMEOVER" || gameState === "IDLE") {
-    startRunnerGame();
-  }
-}
-
-function spawnObstacle() {
-  const types = ["hurdle", "laser", "double-hurdle"];
-  const type = types[Math.floor(Math.random() * types.length)];
+function initGame() {
+  const canvas = document.getElementById("gameCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
   
-  if (type === "hurdle") {
-    obstacles.push({
-      x: gameCanvas.width + 20,
-      y: GROUND_Y - 32,
-      width: 22,
-      height: 32,
-      type: "hurdle"
-    });
-  } else if (type === "laser") {
-    obstacles.push({
-      x: gameCanvas.width + 20,
-      y: GROUND_Y - 26,
-      width: 16,
-      height: 26,
-      type: "laser"
-    });
-  } else if (type === "double-hurdle") {
-    obstacles.push({
-      x: gameCanvas.width + 20,
-      y: GROUND_Y - 36,
-      width: 38,
-      height: 36,
-      type: "double-hurdle"
-    });
+  const viewport = document.getElementById("gameViewport");
+  const gameMsg = document.getElementById("gameMsg");
+  const btnGamePlay = document.getElementById("btnGamePlay");
+  const scoreDistEl = document.getElementById("scoreDist");
+  const highScoreEl = document.getElementById("highScore");
+
+  let gameState = "IDLE"; // IDLE, RUNNING, GAMEOVER
+  let animId = null;
+  let highScore = parseInt(localStorage.getItem("woofam_game_high") || "0", 10);
+  if (highScoreEl) highScoreEl.textContent = `${highScore}m`;
+
+  const GROUND_Y = 160;
+  const PIXEL_SIZE = 2.4; // Pixel size for 8-bit rendering
+
+  // --- Pixel Art Color Palette ---
+  const C_SKIN = "#ffdbac";
+  const C_HAIR = "#2d1a10";
+  const C_SHIRT = "#2563eb"; // Woofam Blue
+  const C_SHIRT_DARK = "#1d4ed8";
+  const C_PANTS = "#334155";
+  const C_SHOES = "#ffffff";
+  const C_SHOE_SOLE = "#0f172a";
+
+  // --- Pixel Human Sprites (14 width x 18 height matrix) ---
+  // . = empty, H = hair, S = skin, T = shirt, t = dark shirt, P = pants, W = shoes, B = black
+  const SPRITE_RUN_1 = [
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHSSSSSH...",
+    "...HHSSBSSH...",
+    "....SSSSSS....",
+    "....SSSSSS....",
+    "...TTTTTTTT...",
+    "..STTTTTTTTS..",
+    "..STTTTTTTTS..",
+    "..S.TTTTTT.S..",
+    "....PPPPPP....",
+    "....PP..PP....",
+    "...PP....PP...",
+    "...PP....PP...",
+    "...PP.....PP..",
+    "..WW......WW..",
+    "..BB......BB..",
+    ".............."
+  ];
+
+  const SPRITE_RUN_2 = [
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHSSSSSH...",
+    "...HHSSBSSH...",
+    "....SSSSSS....",
+    "....SSSSSS....",
+    "...TTTTTTTT...",
+    "...TTTTTTTT...",
+    "...STTTTTTS...",
+    "...S.TTTT.S...",
+    "....PPPPPP....",
+    "....PPPPPP....",
+    ".....PPPP.....",
+    ".....PPPP.....",
+    ".....PPPP.....",
+    ".....WWWW.....",
+    ".....BBBB.....",
+    ".............."
+  ];
+
+  const SPRITE_RUN_3 = [
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHSSSSSH...",
+    "...HHSSBSSH...",
+    "....SSSSSS....",
+    "....SSSSSS....",
+    "...TTTTTTTT...",
+    "..STTTTTTTTS..",
+    "..STTTTTTTTS..",
+    "..S.TTTTTT.S..",
+    "....PPPPPP....",
+    "....PP..PP....",
+    "...PP....PP...",
+    "..PP......PP..",
+    "..PP......PP..",
+    ".WW........WW.",
+    ".BB........BB.",
+    ".............."
+  ];
+
+  const SPRITE_JUMP = [
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHSSSSSH...",
+    "...HHSSBSSH...",
+    "....SSSSSS....",
+    "....SSSSSS....",
+    "..STTTTTTTTS..",
+    "..STTTTTTTTS..",
+    "...TTTTTTTT...",
+    "....PPPPPP....",
+    "....PPPPPP....",
+    "...PPPPPPPP...",
+    "..WW......WW..",
+    "..BB......BB..",
+    "..............",
+    "..............",
+    "..............",
+    ".............."
+  ];
+
+  // --- Runner Entity ---
+  const runner = {
+    x: 60,
+    y: GROUND_Y - 18 * PIXEL_SIZE,
+    width: 14 * PIXEL_SIZE,
+    height: 18 * PIXEL_SIZE,
+    vy: 0,
+    gravity: 0.72,
+    jumpPower: -12.8,
+    isGrounded: true,
+    animFrame: 0
+  };
+
+  let obstacles = [];
+  let treadmillMarks = [];
+  let score = 0;
+  let speed = 5.2;
+  let spawnCounter = 60;
+  let particles = [];
+
+  // Initialize treadmill marks
+  for (let i = 0; i < 25; i++) {
+    treadmillMarks.push(i * 36);
   }
-}
 
-let lastTime = 0;
-function loopGame() {
-  if (gameState !== "RUNNING") return;
-
-  updateGame();
-  drawGame();
-
-  gameAnimId = requestAnimationFrame(loopGame);
-}
-
-function updateGame() {
-  gameScore += 0.2;
-  const currentDist = Math.floor(gameScore);
-
-  // Speed up dynamically
-  gameSpeed = 6 + Math.min(6, currentDist / 120);
-  if (gameSpeedDisplayEl) {
-    gameSpeedDisplayEl.textContent = `${(gameSpeed / 6).toFixed(1)}x`;
-  }
-
-  // 3-sec milestones
-  if (currentDist === 30) {
-    celebrationText = "⚡ 3초 돌파! 쾌속 생존 공식 발동!";
-    celebrationTimer = 90;
-  } else if (currentDist === 100) {
-    celebrationText = "🔥 100m 돌파! 갓생 러너!";
-    celebrationTimer = 90;
-  } else if (currentDist === 300) {
-    celebrationText = "👑 300m 레전드 달성!";
-    celebrationTimer = 120;
-  }
-
-  if (celebrationTimer > 0) celebrationTimer--;
-
-  // Runner Physics
-  runner.vy += runner.gravity;
-  runner.y += runner.vy;
-
-  if (runner.y >= GROUND_Y - runner.height) {
+  function resetGame() {
     runner.y = GROUND_Y - runner.height;
     runner.vy = 0;
     runner.isGrounded = true;
+    runner.animFrame = 0;
+    obstacles = [];
+    particles = [];
+    score = 0;
+    speed = 5.5;
+    spawnCounter = 50;
+    if (scoreDistEl) scoreDistEl.textContent = "0m";
   }
 
-  runner.runFrame += 0.25;
-
-  // Running particles
-  if (runner.isGrounded && Math.random() < 0.3) {
-    runner.particles.push({
-      x: runner.x,
-      y: runner.y + runner.height - 2,
-      vx: -gameSpeed * 0.5 + (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
-      size: Math.random() * 3 + 1.5,
-      color: "#818cf8",
-      alpha: 0.8
-    });
+  function startGame() {
+    resetGame();
+    gameState = "RUNNING";
+    gameMsg.classList.add("hidden");
+    viewport.focus();
+    if (animId) cancelAnimationFrame(animId);
+    gameLoop();
   }
 
-  // Update particles
-  for (let i = runner.particles.length - 1; i >= 0; i--) {
-    const p = runner.particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= 0.04;
-    if (p.alpha <= 0) {
-      runner.particles.splice(i, 1);
+  function jump() {
+    if (gameState === "RUNNING") {
+      if (runner.isGrounded) {
+        runner.vy = runner.jumpPower;
+        runner.isGrounded = false;
+        // jump particles
+        for (let i = 0; i < 6; i++) {
+          particles.push({
+            x: runner.x + runner.width / 2 + (Math.random() - 0.5) * 12,
+            y: GROUND_Y - 2,
+            vx: (Math.random() - 0.5) * 3,
+            vy: Math.random() * -2,
+            life: 18,
+            color: "#60a5fa"
+          });
+        }
+      }
+    } else if (gameState === "IDLE" || gameState === "GAMEOVER") {
+      startGame();
     }
   }
 
-  // Treadmill Lines Animation
-  for (let line of treadmillLines) {
-    line.x -= gameSpeed;
-    if (line.x < -20) {
-      line.x = gameCanvas.width + 20;
+  function spawnObstacle() {
+    const types = ["hurdle", "cone", "barrier"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    if (type === "hurdle") {
+      obstacles.push({
+        x: canvas.width + 20,
+        y: GROUND_Y - 26,
+        width: 18,
+        height: 26,
+        type: "hurdle"
+      });
+    } else if (type === "cone") {
+      obstacles.push({
+        x: canvas.width + 20,
+        y: GROUND_Y - 20,
+        width: 16,
+        height: 20,
+        type: "cone"
+      });
+    } else {
+      obstacles.push({
+        x: canvas.width + 20,
+        y: GROUND_Y - 32,
+        width: 26,
+        height: 32,
+        type: "barrier"
+      });
     }
   }
 
-  // Spawn Obstacles
-  spawnTimer--;
-  if (spawnTimer <= 0) {
-    spawnObstacle();
-    // Random interval based on speed
-    spawnTimer = Math.floor(Math.random() * 45 + 50 - Math.min(25, gameSpeed * 2));
-  }
+  function update() {
+    // Distance & Speed
+    score += 0.18;
+    const currentM = Math.floor(score);
+    if (scoreDistEl) scoreDistEl.textContent = `${currentM}m`;
+    speed = 5.5 + Math.min(6, currentM / 100);
 
-  // Update Obstacles & Collision Check
-  for (let i = obstacles.length - 1; i >= 0; i--) {
-    const obs = obstacles[i];
-    obs.x -= gameSpeed;
+    // Physics
+    runner.vy += runner.gravity;
+    runner.y += runner.vy;
 
-    // Hitbox collision (with slight inner margin for forgiving feel)
-    const margin = 5;
-    if (
-      runner.x + margin < obs.x + obs.width &&
-      runner.x + runner.width - margin > obs.x &&
-      runner.y + margin < obs.y + obs.height &&
-      runner.y + runner.height > obs.y + margin
-    ) {
-      gameOver();
-      return;
+    if (runner.y >= GROUND_Y - runner.height) {
+      runner.y = GROUND_Y - runner.height;
+      runner.vy = 0;
+      runner.isGrounded = true;
     }
 
-    if (obs.x + obs.width < -50) {
-      obstacles.splice(i, 1);
+    runner.animFrame += 0.22;
+
+    // Running particles
+    if (runner.isGrounded && Math.random() < 0.25) {
+      particles.push({
+        x: runner.x + 4,
+        y: GROUND_Y - 2,
+        vx: -speed * 0.4 + (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 1.5,
+        life: 14,
+        color: "#94a3b8"
+      });
+    }
+
+    // Update Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+
+    // Treadmill Belt Marks
+    for (let i = 0; i < treadmillMarks.length; i++) {
+      treadmillMarks[i] -= speed;
+      if (treadmillMarks[i] < -20) {
+        treadmillMarks[i] = canvas.width + 10;
+      }
+    }
+
+    // Spawn Obstacles
+    spawnCounter--;
+    if (spawnCounter <= 0) {
+      spawnObstacle();
+      spawnCounter = Math.floor(Math.random() * 40 + 55 - Math.min(25, speed * 2));
+    }
+
+    // Update & Check Obstacles
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const obs = obstacles[i];
+      obs.x -= speed;
+
+      // Hitbox Collision (Tight & Fair)
+      const padX = 4;
+      const padY = 4;
+      if (
+        runner.x + padX < obs.x + obs.width &&
+        runner.x + runner.width - padX > obs.x &&
+        runner.y + padY < obs.y + obs.height &&
+        runner.y + runner.height > obs.y + padY
+      ) {
+        handleGameOver();
+        return;
+      }
+
+      if (obs.x + obs.width < -30) {
+        obstacles.splice(i, 1);
+      }
     }
   }
-}
 
-function gameOver() {
-  gameState = "GAMEOVER";
-  const finalDist = Math.floor(gameScore);
-  if (finalDist > highScore) {
-    highScore = finalDist;
-    localStorage.setItem("woofam_runner_highscore", highScore);
-    updateHighScoreDisplay();
-    showToast(`🏆 신기록 달성! ${highScore}m`);
-  }
+  function handleGameOver() {
+    gameState = "GAMEOVER";
+    const finalDist = Math.floor(score);
+    if (finalDist > highScore) {
+      highScore = finalDist;
+      localStorage.setItem("woofam_game_high", highScore);
+      if (highScoreEl) highScoreEl.textContent = `${highScore}m`;
+    }
 
-  if (gameOverlayMsg) {
-    gameOverlayMsg.classList.remove("hidden");
-    gameOverlayMsg.innerHTML = `
-      <div class="game-start-card">
-        <div class="game-card-icon">💥</div>
-        <h3 style="color: #ef4444;">GAME OVER</h3>
-        <p class="game-instruction">기록: <strong>${finalDist}m</strong> (최고 기록: ${highScore}m)</p>
-        <button type="button" class="btn-start-game" onclick="startRunnerGame()">다시 도전하기 (Space / 탭)</button>
+    gameMsg.classList.remove("hidden");
+    gameMsg.innerHTML = `
+      <div class="game-start-box">
+        <span class="start-icon">💥</span>
+        <h4 style="color: #ef4444;">GAME OVER</h4>
+        <p>기록: <strong>${finalDist}m</strong> (최고 기록: ${highScore}m)</p>
+        <button type="button" class="btn-game-play" onclick="window.startWoofamGame()">다시 달리기 (Space)</button>
       </div>
     `;
   }
-}
 
-function drawGame() {
-  if (!ctx) return;
-  const w = gameCanvas.width;
-  const h = gameCanvas.height;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Clear Canvas (Dark Arcade Theme)
-  ctx.fillStyle = "#090d16";
-  ctx.fillRect(0, 0, w, h);
+    // Background (Dark Retro Runner)
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Background Grid Lines
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-  ctx.lineWidth = 1;
-  for (let x = 0; x < w; x += 40) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, GROUND_Y);
-    ctx.stroke();
-  }
+    // Treadmill Belt (Ground)
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
 
-  // Treadmill Ground Belt
-  ctx.fillStyle = "#111827";
-  ctx.fillRect(0, GROUND_Y, w, h - GROUND_Y);
+    // Treadmill Top Guide Line
+    ctx.fillStyle = "#3b82f6";
+    ctx.fillRect(0, GROUND_Y, canvas.width, 2);
 
-  // Treadmill Neon Top Edge
-  const grad = ctx.createLinearGradient(0, 0, w, 0);
-  grad.addColorStop(0, "#6366f1");
-  grad.addColorStop(0.5, "#38bdf8");
-  grad.addColorStop(1, "#34d399");
-  ctx.strokeStyle = grad;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(0, GROUND_Y);
-  ctx.lineTo(w, GROUND_Y);
-  ctx.stroke();
-
-  // Treadmill moving stripes
-  ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
-  ctx.lineWidth = 4;
-  for (let line of treadmillLines) {
-    ctx.beginPath();
-    ctx.moveTo(line.x, GROUND_Y + 4);
-    ctx.lineTo(line.x - 15, h);
-    ctx.stroke();
-  }
-
-  // Draw Particles
-  for (let p of runner.particles) {
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.alpha;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1.0;
-
-  // Draw Runner (Cyber Neon Mascot with animated legs)
-  drawRunner(ctx, runner);
-
-  // Draw Obstacles
-  for (let obs of obstacles) {
-    drawObstacle(ctx, obs);
-  }
-
-  // In-Game HUD: Score & Speed
-  ctx.fillStyle = "#f8fafc";
-  ctx.font = "bold 18px Outfit, sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText(`⚡ ${Math.floor(gameScore)}m`, 20, 36);
-
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "14px JetBrains Mono, monospace";
-  ctx.fillText(`HI: ${highScore}m`, 110, 36);
-
-  // Celebration Notification
-  if (celebrationTimer > 0 && celebrationText) {
-    ctx.fillStyle = "#fbbf24";
-    ctx.font = "bold 16px Outfit, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(celebrationText, w / 2, 50);
-  }
-}
-
-function drawRunner(c, r) {
-  const isJumping = !r.isGrounded;
-
-  // Glow aura
-  c.shadowColor = "#818cf8";
-  c.shadowBlur = 12;
-
-  // Body (Modern Stylized Cyber Capsule)
-  c.fillStyle = "#818cf8";
-  c.beginPath();
-  c.roundRect(r.x, r.y, r.width, r.height - 12, 8);
-  c.fill();
-
-  // Lightning Eye Visor
-  c.fillStyle = "#38bdf8";
-  c.fillRect(r.x + 14, r.y + 8, 14, 6);
-
-  // 3-Sec Lightning Logo on Body
-  c.fillStyle = "#fbbf24";
-  c.font = "bold 12px Outfit";
-  c.fillText("⚡", r.x + 8, r.y + 22);
-
-  c.shadowBlur = 0; // Reset shadow
-
-  // Animated Running Legs
-  c.strokeStyle = "#38bdf8";
-  c.lineWidth = 4;
-  c.lineCap = "round";
-
-  const legY = r.y + r.height - 12;
-  if (isJumping) {
-    // Tucked legs during jump
-    c.beginPath();
-    c.moveTo(r.x + 8, legY);
-    c.lineTo(r.x + 4, legY + 8);
-    c.stroke();
-
-    c.beginPath();
-    c.moveTo(r.x + 22, legY);
-    c.lineTo(r.x + 26, legY + 8);
-    c.stroke();
-  } else {
-    // Running stride
-    const cycle = Math.sin(r.runFrame) * 10;
-    c.beginPath();
-    c.moveTo(r.x + 10, legY);
-    c.lineTo(r.x + 10 + cycle, legY + 12);
-    c.stroke();
-
-    c.beginPath();
-    c.moveTo(r.x + 20, legY);
-    c.lineTo(r.x + 20 - cycle, legY + 12);
-    c.stroke();
-  }
-}
-
-function drawObstacle(c, obs) {
-  c.shadowColor = "#ef4444";
-  c.shadowBlur = 10;
-
-  if (obs.type === "hurdle") {
-    // Athletic Neon Hurdle
-    c.fillStyle = "#ef4444";
-    c.fillRect(obs.x + 2, obs.y, obs.width - 4, 6); // Top bar
-    c.fillStyle = "#ffffff";
-    c.fillRect(obs.x + 7, obs.y, 4, 6); // Stripe
-
-    // Posts
-    c.fillStyle = "#94a3b8";
-    c.fillRect(obs.x + 2, obs.y + 6, 4, obs.height - 6);
-    c.fillRect(obs.x + obs.width - 6, obs.y + 6, 4, obs.height - 6);
-  } else if (obs.type === "laser") {
-    // Laser Energy Barrier
-    c.fillStyle = "#f59e0b";
-    c.fillRect(obs.x, obs.y, obs.width, obs.height);
-    c.fillStyle = "#ffffff";
-    c.fillRect(obs.x + 4, obs.y + 4, obs.width - 8, obs.height - 8);
-  } else if (obs.type === "double-hurdle") {
-    // Double Hurdle Combination
-    c.fillStyle = "#ec4899";
-    c.fillRect(obs.x, obs.y, obs.width, 8);
-    c.fillStyle = "#ffffff";
-    c.fillRect(obs.x + 12, obs.y, 6, 8);
-    c.fillStyle = "#94a3b8";
-    c.fillRect(obs.x + 3, obs.y + 8, 4, obs.height - 8);
-    c.fillRect(obs.x + obs.width - 7, obs.y + 8, 4, obs.height - 8);
-  }
-
-  c.shadowBlur = 0;
-}
-
-function drawIdleScreen() {
-  if (!ctx) return;
-  const w = gameCanvas.width;
-  const h = gameCanvas.height;
-
-  ctx.fillStyle = "#090d16";
-  ctx.fillRect(0, 0, w, h);
-
-  // Ground
-  ctx.fillStyle = "#111827";
-  ctx.fillRect(0, GROUND_Y, w, h - GROUND_Y);
-  ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(0, GROUND_Y);
-  ctx.lineTo(w, GROUND_Y);
-  ctx.stroke();
-
-  // Draw idle runner
-  drawRunner(ctx, runner);
-}
-
-// --- 7. Event Listeners Setup ---
-function setupEventListeners() {
-  // Theme toggle
-  themeToggleBtn?.addEventListener("click", toggleTheme);
-
-  // Search input
-  searchInput?.addEventListener("input", (e) => {
-    searchQuery = e.target.value;
-    if (searchClearBtn) {
-      searchClearBtn.style.display = searchQuery ? "inline-flex" : "none";
+    // Treadmill moving stripes
+    ctx.fillStyle = "#334155";
+    for (let mark of treadmillMarks) {
+      ctx.fillRect(mark, GROUND_Y + 4, 18, canvas.height - GROUND_Y - 4);
     }
-    renderServicesGrid();
-  });
 
-  // Search clear
-  searchClearBtn?.addEventListener("click", () => {
-    searchInput.value = "";
-    searchQuery = "";
-    searchClearBtn.style.display = "none";
-    searchInput.focus();
-    renderServicesGrid();
-  });
+    // Draw Particles
+    for (let p of particles) {
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x, p.y, 3, 3);
+    }
 
-  // Filter pills
-  filterPills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      filterPills.forEach((p) => p.classList.remove("active"));
-      pill.classList.add("active");
-      currentCategory = pill.getAttribute("data-category") || "all";
-      renderServicesGrid();
-    });
-  });
+    // Draw Bitmap Pixel Human Runner
+    drawPixelRunner(ctx, runner);
 
-  // Easter Egg Game Triggers
-  easterEggBtn?.addEventListener("click", openEasterEggGame);
-  closeGameBtn?.addEventListener("click", closeEasterEggGame);
-  startGameBtn?.addEventListener("click", startRunnerGame);
+    // Draw Obstacles
+    for (let obs of obstacles) {
+      drawPixelObstacle(ctx, obs);
+    }
+  }
 
-  // Logo double-click easter egg
-  const brandLogo = document.getElementById("brandLogo");
-  brandLogo?.addEventListener("dblclick", (e) => {
-    e.preventDefault();
-    openEasterEggGame();
-    showToast("🎉 이스터에그 발견! 3초 허들 달리기 게임을 시작합니다.");
-  });
-
-  // Keyboard controls for game
-  window.addEventListener("keydown", (e) => {
-    // If modal is active
-    if (gameModal?.classList.contains("active")) {
-      if (e.code === "Space" || e.code === "ArrowUp") {
-        e.preventDefault();
-        jump();
-      } else if (e.code === "Escape") {
-        closeEasterEggGame();
-      } else if (e.code === "KeyR" && gameState === "GAMEOVER") {
-        startRunnerGame();
-      }
+  function drawPixelRunner(c, r) {
+    let sprite;
+    if (!r.isGrounded) {
+      sprite = SPRITE_JUMP;
     } else {
-      // Shortcut 'G' or 'g' when not in search input
-      if ((e.key === "g" || e.key === "G") && document.activeElement !== searchInput) {
-        openEasterEggGame();
+      const step = Math.floor(r.animFrame) % 3;
+      if (step === 0) sprite = SPRITE_RUN_1;
+      else if (step === 1) sprite = SPRITE_RUN_2;
+      else sprite = SPRITE_RUN_3;
+    }
+
+    for (let row = 0; row < sprite.length; row++) {
+      const line = sprite[row];
+      for (let col = 0; col < line.length; col++) {
+        const ch = line[col];
+        if (ch === ".") continue;
+
+        if (ch === "H") c.fillStyle = C_HAIR;
+        else if (ch === "S") c.fillStyle = C_SKIN;
+        else if (ch === "T") c.fillStyle = C_SHIRT;
+        else if (ch === "t") c.fillStyle = C_SHIRT_DARK;
+        else if (ch === "P") c.fillStyle = C_PANTS;
+        else if (ch === "W") c.fillStyle = C_SHOES;
+        else if (ch === "B") c.fillStyle = C_SHOE_SOLE;
+        else c.fillStyle = "#ffffff";
+
+        c.fillRect(r.x + col * PIXEL_SIZE, r.y + row * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
       }
     }
-  });
+  }
 
-  // Touch / Click on canvas to jump
-  gameCanvas?.addEventListener("pointerdown", (e) => {
+  function drawPixelObstacle(c, obs) {
+    if (obs.type === "hurdle") {
+      // 8-bit Athletic Red/White Hurdle
+      c.fillStyle = "#ef4444";
+      c.fillRect(obs.x, obs.y, obs.width, 6);
+      c.fillStyle = "#ffffff";
+      c.fillRect(obs.x + 5, obs.y, 4, 6);
+      c.fillRect(obs.x + 13, obs.y, 4, 6);
+
+      // Hurdle Legs
+      c.fillStyle = "#cbd5e1";
+      c.fillRect(obs.x + 2, obs.y + 6, 3, obs.height - 6);
+      c.fillRect(obs.x + obs.width - 5, obs.y + 6, 3, obs.height - 6);
+    } else if (obs.type === "cone") {
+      // Traffic Cone
+      c.fillStyle = "#f97316";
+      c.fillRect(obs.x + 6, obs.y, 4, 6);
+      c.fillStyle = "#ffffff";
+      c.fillRect(obs.x + 4, obs.y + 6, 8, 4);
+      c.fillStyle = "#f97316";
+      c.fillRect(obs.x + 2, obs.y + 10, 12, 6);
+      c.fillStyle = "#1e293b";
+      c.fillRect(obs.x, obs.y + 16, obs.width, 4);
+    } else {
+      // Electronic Barrier
+      c.fillStyle = "#f59e0b";
+      c.fillRect(obs.x, obs.y, obs.width, 8);
+      c.fillStyle = "#ffffff";
+      c.fillRect(obs.x + 6, obs.y + 2, obs.width - 12, 4);
+      c.fillStyle = "#64748b";
+      c.fillRect(obs.x + 3, obs.y + 8, 4, obs.height - 8);
+      c.fillRect(obs.x + obs.width - 7, obs.y + 8, 4, obs.height - 8);
+    }
+  }
+
+  function gameLoop() {
+    if (gameState !== "RUNNING") return;
+    update();
+    draw();
+    animId = requestAnimationFrame(gameLoop);
+  }
+
+  // Draw initial idle screen
+  draw();
+
+  // Global expose for start button
+  window.startWoofamGame = startGame;
+
+  // Event Listeners
+  btnGamePlay?.addEventListener("click", startGame);
+
+  viewport?.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     jump();
   });
 
-  // Close modal when clicking outside
-  gameModal?.addEventListener("click", (e) => {
-    if (e.target === gameModal) {
-      closeEasterEggGame();
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp") {
+      // Prevent browser scrolling with spacebar when focused or playing
+      const isInput = document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA");
+      if (!isInput) {
+        e.preventDefault();
+        jump();
+      }
     }
   });
 }
-
-// Global expose for inline handler
-window.openEasterEggGame = openEasterEggGame;
-window.copyServiceUrl = copyServiceUrl;
-window.startRunnerGame = startRunnerGame;
-
-// --- 8. Initialization ---
-document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
-  renderFeatured();
-  renderServicesGrid();
-  setupEventListeners();
-});
