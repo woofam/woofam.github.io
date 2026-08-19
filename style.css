@@ -49,6 +49,7 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   line-height: 1.6;
+  word-break: keep-all;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   display: flex;
