@@ -18,8 +18,6 @@
 
   --badge-live-bg: #ecfdf5;
   --badge-live-text: #059669;
-  --badge-soon-bg: #f1f5f9;
-  --badge-soon-text: #64748b;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -52,7 +50,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: 980px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -129,25 +127,25 @@ body {
 /* --- Main Content Layout --- */
 .main-content {
   flex: 1;
-  padding: 40px 20px 60px;
+  padding: 36px 20px 50px;
 }
 
 /* --- Intro Section --- */
 .intro-section {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 
 .intro-title {
-  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-main);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .intro-desc {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   color: var(--text-sub);
   max-width: 600px;
   margin: 0 auto;
@@ -157,152 +155,179 @@ body {
   color: var(--brand-blue);
 }
 
-/* --- 3-Sec Services Grid --- */
-.services-section {
-  margin-bottom: 48px;
+/* --- Single Flagship Brand Big Card --- */
+.brand-hero-section {
+  margin-bottom: 32px;
 }
 
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.service-card {
+.brand-big-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.service-card:hover {
-  border-color: var(--brand-blue);
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 32px;
   box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+  transition: all var(--transition);
 }
 
-.service-card.highlight {
-  border-color: rgba(37, 99, 235, 0.35);
-  background: linear-gradient(to bottom, #ffffff, #fafcff);
+.brand-big-card:hover {
+  border-color: var(--brand-blue);
+  box-shadow: var(--shadow-lg);
 }
 
-.card-header {
+.card-badge-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
-.service-icon {
-  font-size: 1.8rem;
-  line-height: 1;
+.badge-flagship {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--brand-blue-light);
+  color: var(--brand-blue);
+  letter-spacing: 0.05em;
 }
 
-.card-badge {
+.badge-live-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
+  background: var(--badge-live-bg);
+  color: var(--badge-live-text);
   letter-spacing: 0.04em;
 }
 
-.card-badge.live {
-  background: var(--badge-live-bg);
-  color: var(--badge-live-text);
+.badge-live-pulse .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
 }
 
-.card-badge.soon {
-  background: var(--badge-soon-bg);
-  color: var(--badge-soon-text);
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+.big-card-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--text-main);
-  letter-spacing: -0.01em;
+  margin-bottom: 6px;
 }
 
-.card-hint {
-  font-size: 0.92rem;
+.big-card-tagline {
+  font-size: 1rem;
   font-weight: 600;
   color: var(--brand-blue);
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-bottom: 12px;
 }
 
-.card-detail {
-  font-size: 0.88rem;
+.big-card-desc {
+  font-size: 0.95rem;
   color: var(--text-sub);
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 24px;
 }
 
-.card-actions {
+/* Sub-Features Pills Grid */
+.brand-sub-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.sub-feature-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
 }
 
-.btn-primary {
-  flex: 1;
-  display: inline-flex;
+.sub-feature-pill:hover {
+  background: #ffffff;
+  border-color: rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
+}
+
+.sub-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.sub-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-text strong {
+  font-size: 0.92rem;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.sub-text small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Big Launch Button */
+.big-card-action {
+  margin-top: 8px;
+}
+
+.btn-launch-big {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
   background: var(--brand-blue);
   color: #ffffff;
-  font-weight: 700;
-  font-size: 0.88rem;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
   text-decoration: none;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
   transition: all var(--transition);
 }
 
-.btn-primary:hover {
+.btn-launch-big:hover {
   background: var(--brand-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
 }
 
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: #ffffff;
-  color: var(--text-sub);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all var(--transition);
+.btn-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.btn-outline:hover {
-  background: #f8fafc;
-  color: var(--text-main);
-  border-color: var(--border-hover);
+.btn-main-txt {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
-.btn-disabled {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f5f9;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.88rem;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  cursor: not-allowed;
+.btn-sub-txt {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  font-family: monospace, sans-serif;
+}
+
+.btn-arrow {
+  transition: transform var(--transition);
+}
+
+.btn-launch-big:hover .btn-arrow {
+  transform: translateX(4px);
 }
 
 /* --- Inline Game Section --- */
@@ -313,7 +338,7 @@ body {
 .game-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-sm);
 }
@@ -505,6 +530,9 @@ body {
   }
   .btn-git {
     align-self: flex-start;
+  }
+  .brand-sub-features {
+    grid-template-columns: 1fr;
   }
   .footer-inner {
     flex-direction: column;
