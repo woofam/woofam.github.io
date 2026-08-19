@@ -16,8 +16,15 @@
   --brand-blue-hover: #1d4ed8;
   --brand-blue-light: #eff6ff;
 
+  --brand-purple: #7c3aed;
+  --brand-purple-hover: #6d28d9;
+  --brand-purple-light: #f5f3ff;
+
   --badge-live-bg: #ecfdf5;
   --badge-live-text: #059669;
+
+  --badge-engine-bg: #fdf2f8;
+  --badge-engine-text: #be185d;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -133,7 +140,7 @@ body {
 /* --- Intro Section --- */
 .intro-section {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .intro-title {
@@ -155,22 +162,42 @@ body {
   color: var(--brand-blue);
 }
 
-/* --- Single Flagship Brand Big Card --- */
-.brand-hero-section {
-  margin-bottom: 32px;
+/* --- Two-Pillar Brand Portfolio Showcase --- */
+.brand-portfolio-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-bottom: 36px;
 }
 
-.brand-big-card {
+.brand-card {
   background: var(--bg-card);
-  border: 1.5px solid rgba(37, 99, 235, 0.25);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-md);
   transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.brand-big-card:hover {
+/* 3SEC Card Accent */
+.brand-card-3sec {
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+}
+
+.brand-card-3sec:hover {
   border-color: var(--brand-blue);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Kids English Studio Card Accent */
+.brand-card-kids {
+  border: 1.5px solid rgba(124, 58, 237, 0.25);
+}
+
+.brand-card-kids:hover {
+  border-color: var(--brand-purple);
   box-shadow: var(--shadow-lg);
 }
 
@@ -181,14 +208,22 @@ body {
   margin-bottom: 16px;
 }
 
-.badge-flagship {
+.badge-brand-tag {
   font-size: 0.72rem;
   font-weight: 800;
   padding: 4px 10px;
   border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+}
+
+.badge-3sec-tag {
   background: var(--brand-blue-light);
   color: var(--brand-blue);
-  letter-spacing: 0.05em;
+}
+
+.badge-kids-tag {
+  background: var(--brand-purple-light);
+  color: var(--brand-purple);
 }
 
 .badge-live-pulse {
@@ -212,22 +247,50 @@ body {
   box-shadow: 0 0 8px #10b981;
 }
 
-.big-card-title {
-  font-size: 1.7rem;
+.badge-status-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--badge-engine-bg);
+  color: var(--badge-engine-text);
+  letter-spacing: 0.04em;
+}
+
+.badge-status-engine .engine-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #be185d;
+  box-shadow: 0 0 8px #be185d;
+}
+
+.brand-card-title {
+  font-size: 1.65rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text-main);
   margin-bottom: 6px;
 }
 
-.big-card-tagline {
-  font-size: 1rem;
+.brand-card-tagline {
+  font-size: 0.98rem;
   font-weight: 600;
-  color: var(--brand-blue);
   margin-bottom: 12px;
 }
 
-.big-card-desc {
+.brand-card-3sec .brand-card-tagline {
+  color: var(--brand-blue);
+}
+
+.brand-card-kids .brand-card-tagline {
+  color: var(--brand-purple);
+}
+
+.brand-card-desc {
   font-size: 0.95rem;
   color: var(--text-sub);
   line-height: 1.6;
@@ -253,9 +316,15 @@ body {
   transition: all var(--transition);
 }
 
-.sub-feature-pill:hover {
+.brand-card-3sec .sub-feature-pill:hover {
   background: #ffffff;
   border-color: rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
+}
+
+.brand-card-kids .sub-feature-pill:hover {
+  background: #ffffff;
+  border-color: rgba(124, 58, 237, 0.4);
   transform: translateY(-2px);
 }
 
@@ -280,28 +349,42 @@ body {
   color: var(--text-muted);
 }
 
-/* Big Launch Button */
-.big-card-action {
+/* Big Brand Launch Button */
+.brand-card-action {
   margin-top: 8px;
 }
 
-.btn-launch-big {
+.btn-launch-brand {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--brand-blue);
   color: #ffffff;
   padding: 16px 24px;
   border-radius: var(--radius-md);
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
   transition: all var(--transition);
 }
 
-.btn-launch-big:hover {
+.btn-launch-brand.btn-3sec {
+  background: var(--brand-blue);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.btn-launch-brand.btn-3sec:hover {
   background: var(--brand-blue-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+.btn-launch-brand.btn-kids {
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.btn-launch-brand.btn-kids:hover {
+  background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
 }
 
 .btn-text-group {
@@ -311,14 +394,14 @@ body {
 }
 
 .btn-main-txt {
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
 
 .btn-sub-txt {
   font-size: 0.8rem;
-  opacity: 0.85;
+  opacity: 0.88;
   font-family: monospace, sans-serif;
 }
 
@@ -326,9 +409,10 @@ body {
   transition: transform var(--transition);
 }
 
-.btn-launch-big:hover .btn-arrow {
+.btn-launch-brand:hover .btn-arrow {
   transform: translateX(4px);
 }
+
 
 /* --- Inline Game Section --- */
 .game-section {
