@@ -30,4 +30,4 @@
 
 ## 📄 License
 
-MIT License © 2026 Woofam
+© 2026 Woofam. All rights reserved.
